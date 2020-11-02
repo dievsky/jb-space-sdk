@@ -24,6 +24,25 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+/**
+ * Describes a Space service that allows to make API calls.
+ *
+ * The API requests correspond to the getter-style methods.
+ * For example, the getHolidays() method queries the "/api/http/public-holidays/holidays" API endpoint.
+ *
+ * Required request parameters correspond to the method parameters.
+ * For example, the getProfileHolidays(...) method accepts three parameters,
+ * because the "/api/http/public-holidays/holidays/profile-holidays" endpoint has three required parameters.
+ *
+ * Optional parameters can be supplied to the request using addParameter or addParameterList.
+ * For example, to add an optional parameter "since" to an "/api/http/team-directory/member-locations" query,
+ * use getMemberLocations().addParameter("since", date).
+ * These methods follow the builder pattern and can be chained.
+ *
+ * To control the output fields, use addField and addRecursiveField methods.
+ *
+ * Our library handles the pagination and chunking of parameter lists internally.
+ */
 public class SpaceService {
 
     private final String domain;
@@ -34,6 +53,11 @@ public class SpaceService {
 
     private static final int SERVER_ERROR_RETRIES = 2;
 
+    /**
+     * @param domain the domain name of the Space server, e.g. "jetbrains.team".
+     * @param serviceId The service ID.
+     * @param serviceSecret The service secret.
+     */
     public SpaceService(String domain, String serviceId, String serviceSecret) {
         this.domain = domain;
         this.serviceId = serviceId;
@@ -84,11 +108,27 @@ public class SpaceService {
         throw new RuntimeException(String.valueOf(response));
     }
 
+    /**
+     * The request to get the public holidays.
+     *
+     * Accepts the following optional parameters:
+     * - "startDate", inclusive, LocalDate
+     * - "endDate", inclusive, LocalDate
+     * - "location", the ID of a location, String. Note that the result will also include the holidays
+     *   for all the parent locations.
+     */
     public ApiRequest<List<PublicHoliday>> getHolidays() {
         return new BatchApiRequest<>("/api/http/public-holidays/holidays",
                 "GET", PublicHoliday.class);
     }
 
+    /**
+     * The request to get the public holidays for a specific member.
+     *
+     * @param memberId the ID of the member, String.
+     * @param since start date, inclusive, LocalDate.
+     * @param till end date, inclusive, LocalDate.
+     */
     @SuppressWarnings("unused")
     public ApiRequest<List<PublicHoliday>> getProfileHolidays(String memberId, LocalDate since, LocalDate till) {
         return new ObjectApiRequest<List<PublicHoliday>>("/api/http/public-holidays/holidays/profile-holidays",
@@ -97,11 +137,33 @@ public class SpaceService {
         ).addParameter("startDate", since).addParameter("endDate", till).addParameter("profile", memberId);
     }
 
+    /**
+     * The request to get the absence records.
+     *
+     * Accepts the following optional filtering parameters:
+     * - "member", the ID of a specific member, String.
+     * - "members", the list of IDs of specific members, List<String>.
+     * - "location", the ID of a location, String.
+     * - "team", the ID of a team, String.
+     * - "since", start date, inclusive, LocalDate.
+     * - "till", end date, inclusive, LocalDate.
+     * - "reason", the ID of a specific absence reason, String.
+     *
+     * @param viewMode One of "All", "WithAccessibleReasonUnapproved", or "WithAccessibleReasonAll"
+     */
     public ApiRequest<List<AbsenceRecord>> getAbsences(String viewMode) {
         return new BatchApiRequest<AbsenceRecord>("/api/http/absences", "GET", AbsenceRecord.class)
                 .addParameter("viewMode", viewMode);
     }
 
+    /**
+     * The request to get the member profiles.
+     *
+     * Accepts the following optional filtering parameters:
+     * "query", a string query, String.
+     * "reportPastMembers", whether to include the members who are no longer active, "true" or "false" String
+     *
+     */
     @SuppressWarnings("unused")
     public ApiRequest<List<TD_MemberProfile>> getProfiles() {
         return new BatchApiRequest<>("/api/http/team-directory/profiles",
@@ -170,19 +232,6 @@ public class SpaceService {
         }
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
-        var spaceService = new SpaceService("jetbrains.team",
-                System.getenv("SERVICE_ID"), System.getenv("SERVICE_SECRET"));
-        var request = spaceService.getProfileHolidays("16iB7l13rCMK",
-                LocalDate.parse("2020-01-01", DateTimeFormatter.ISO_DATE),
-                LocalDate.parse("2020-12-31", DateTimeFormatter.ISO_DATE));
-        //request.addParameter("since", "2020-07-01").addParameter("till", "2020-07-31")
-        /*.addParameter("locationId", "483PEs4EHN3I")*/ //;
-        var data = request.execute();
-        System.out.println(GSON.toJson(data));
-        System.out.println(data.size());
-    }
-
     private static final TypeAdapter<LocalDate> LOCAL_DATE_TYPE_ADAPTER = new TypeAdapter<>() {
         @Override
         public void write(JsonWriter out, LocalDate value) throws IOException {
@@ -219,6 +268,7 @@ public class SpaceService {
 
         /**
          * Add a query parameter to the request, for example "id=12345678".
+         *
          * @param key Query parameter key.
          * @param value Query parameter value.
          * @return this request, following builder pattern.
@@ -227,6 +277,7 @@ public class SpaceService {
 
         /**
          * Add a date-valued query parameter to the request, for example "since=2020-07-21".
+         *
          * @param key Query parameter key.
          * @param value Query parameter value.
          * @return this request, following builder pattern.
@@ -236,10 +287,44 @@ public class SpaceService {
         }
 
         /**
-         * Request to receive a specific field.
+         * Add a boolean-valued query parameter to the request, for example "reportPastMembers=true".
+         *
+         * @param key Query parameter key.
+         * @param value Query parameter value.
+         * @return this request, following builder pattern.
+         */
+        @SuppressWarnings("unused")
+        default ApiRequest<T> addParameter(String key, boolean value) {
+            return addParameter(key, String.valueOf(value));
+        }
+
+        /**
+         * Add a multi-value query parameter to the request, for example "members=id1&members=id2&members=id3".
+         *
+         * Lists longer than 20 are implicitly split into smaller chunks and processed in separate requests.
+         * The results of these requests are then concatenated.
+         *
+         * Only one multi-value parameter per request can be specified.
+         *
+         * @param key Query parameter key.
+         * @param values Query parameter values.
+         * @return this request, following builder pattern.
+         */
+        ApiRequest<T> addParameterList(String key, Collection<String> values);
+
+        /**
+         * Ask to receive a specific field.
+         *
+         * By default, Space serializes all the immediate fields of the response object. The primitive and value fields
+         * are serialized fully, while the reference fields are serialized with only their `id`. You can use this method
+         * to get the embedded fields.
          *
          * For example, `addField("member", "location", "id")` requests `object.member.location.id` field, where
-         * `object` is the object returned by the API request.
+         * `object` is the object returned by the API request. If you don't ask for this field, `object.member` will
+         * only have one non-null field, `object.member.id`, so accessing `object.member.location.id` will cause an NPE.
+         *
+         * Keen readers may notice that the above invocation is redundant. Indeed, since `id` is always serialized
+         * when its parent is, `addField("member", "location")` would have the same effect.
          *
          * @param fieldName The immediate field name.
          * @param fieldNames The nested fields, if any.
@@ -248,9 +333,9 @@ public class SpaceService {
         ApiRequest<T> addField(String fieldName, String... fieldNames);
 
         /**
-         * Request to receive a specific recursively serialized field.
+         * Ask to receive a specific recursively serialized field.
          *
-         * Some objects have fields of the same type as the enclosing object. E.g. a TD_Location object has a field
+         * Some objects have fields of the same type as the enclosing object. E.g. a `TD_Location` object has a field
          * `parent` of the type TD_Location. Calling an ordinary `addField("parent")` will serialize
          * the location's parent, but the grandparent (`location.parent.parent`) will only have the `id` field,
          * and the grand-grandparent will not be serialized at all. To serialize the entire chain, use
@@ -262,12 +347,11 @@ public class SpaceService {
          */
         ApiRequest<T> addRecursiveField(String fieldName, String... fieldNames);
 
-        ApiRequest<T> addParameterList(String key, Collection<String> values);
-
         /**
          * Execute the request and return the result.
          *
-         * `execute` doesn't invalidate the request in any way. You may modify the request and execute it again.
+         * `execute` doesn't invalidate the ApiRequest object in any way. You may modify the request and
+         * execute it again.
          *
          * @return the request result as an appropriate Java object.
          * @throws IOException on network problems.
@@ -371,7 +455,7 @@ public class SpaceService {
         @Override
         public BatchApiRequest<T> addParameterList(String key, Collection<String> values) {
             if (multiparameterKey != null) {
-                throw new IllegalStateException();
+                throw new IllegalStateException("only one multi-value parameter can be supplied");
             }
             multiparameterKey = key;
             multiparameterValues = new ArrayList<>(values);

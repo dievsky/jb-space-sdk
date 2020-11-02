@@ -8,7 +8,7 @@ import java.util.NoSuchElementException;
  * Space HTTP API allows for a very fine control over which fields and embedded objects will be serialized.
  * This structure describes all fields that the object can contain.
  *
- * Use SpaceObject.structure to generate an instance automatically.
+ * Use DatatypeStructureDiscovery.structure to generate an instance automatically.
  */
 public interface DatatypeStructure {
 
@@ -21,6 +21,11 @@ public interface DatatypeStructure {
 
     DatatypeStructure getField(String fieldName, String... fieldNames);
 
+    /**
+     * A primitive is an entity whose fields, if any, cannot be specified in a request.
+     *
+     * Two examples of a primitive are a string (which has no fields) and a date (which is returned as a JSON object).
+     */
     DatatypeStructure PRIMITIVE = new DatatypeStructure() {
 
         @Override

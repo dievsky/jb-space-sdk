@@ -32,6 +32,10 @@ public class CFValue implements SpaceObject {
     return values;
   }
 
+  /**
+   * Try to cast this CFValue object to a more specific type based on the className field.
+   * @return a CFValue of a more specific type, or this.
+   */
   public CFValue cast() {
     if ("StringCFValue".equals(className)) {
       return new StringCFValue((String) value);
