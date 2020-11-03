@@ -1,4 +1,4 @@
-package org.jetbrains.space.sdk;
+package org.jetbrains.space.sdk.api;
 
 import java.io.IOException;
 import java.time.LocalDate;

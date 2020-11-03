@@ -1,4 +1,4 @@
-package org.jetbrains.space.sdk;
+package org.jetbrains.space.sdk.api;
 
 import com.google.gson.reflect.TypeToken;
 import org.jetbrains.space.sdk.datatype.BatchResponse;

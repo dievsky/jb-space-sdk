@@ -1,4 +1,4 @@
-package org.jetbrains.space.sdk;
+package org.jetbrains.space.sdk.api;
 
 import org.jetbrains.space.sdk.fields.DatatypeStructure;
 import org.jetbrains.space.sdk.fields.FieldSpecs;

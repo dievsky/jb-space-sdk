@@ -1,4 +1,4 @@
-package org.jetbrains.space.sdk;
+package org.jetbrains.space.sdk.api;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
@@ -8,8 +8,6 @@ import com.google.gson.stream.JsonWriter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.space.sdk.datatype.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -58,7 +56,6 @@ public class SpaceService {
     private final String serviceSecret;
     private final OAuthToken oauth;
     private final HttpClient httpClient;
-    private final Logger logger;
 
     private static final int SERVER_ERROR_RETRIES = 2;
 
@@ -73,7 +70,6 @@ public class SpaceService {
         this.serviceSecret = serviceSecret;
         oauth = new OAuthToken();
         httpClient = HttpClient.newBuilder().build();
-        logger = LoggerFactory.getLogger(this.getClass());
     }
 
     private HttpRequest.Builder stringRequest(@NotNull String endpoint, @NotNull String method,

@@ -1,4 +1,4 @@
-package org.jetbrains.space.sdk;
+package org.jetbrains.space.sdk.api;
 
 import org.jetbrains.annotations.NotNull;
 
