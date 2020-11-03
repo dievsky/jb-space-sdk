@@ -10,6 +10,8 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.space.sdk.datatype.*;
 import org.jetbrains.space.sdk.fields.DatatypeStructure;
 import org.jetbrains.space.sdk.fields.FieldSpecs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -414,7 +416,7 @@ public class SpaceService {
             final HttpRequest request = keyValueRequest(api, "Bearer " + oauth.token, method, parameterMap)
                     .build();
             final T res = GSON.fromJson(rawQuery(request), type);
-            System.out.println(request.uri() + " queried in " + (System.currentTimeMillis() - start) + " ms");
+            logger.debug("Queried {} in {} ms", request.uri(), System.currentTimeMillis() - start);
             return res;
         }
     }
