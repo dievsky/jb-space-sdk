@@ -44,6 +44,13 @@ import java.util.*;
  * To control the output fields, use addField and addRecursiveField methods.
  *
  * Our library handles the pagination and chunking of parameter lists internally.
+ * It also implicitly requests and refreshes the OAuth token as needed.
+ *
+ * If your favorite endpoint is not implemented yet, you can construct thr request yourself with get* methods!
+ * There are three types of Space API GET queries. Queries can return:
+ * - a single object. Constructed using `get()`.
+ * - a list of objects. Constructed using `getList()`.
+ * - a batch of objects (a part of the list). Constructed using `getBatch()`.
  */
 public class SpaceService {
 
@@ -52,6 +59,7 @@ public class SpaceService {
     private final String serviceSecret;
     private final OAuthToken oauth;
     private final HttpClient httpClient;
+    private final Logger logger;
 
     private static final int SERVER_ERROR_RETRIES = 2;
 
@@ -66,6 +74,7 @@ public class SpaceService {
         this.serviceSecret = serviceSecret;
         oauth = new OAuthToken();
         httpClient = HttpClient.newBuilder().build();
+        logger = LoggerFactory.getLogger(this.getClass());
     }
 
     private HttpRequest.Builder stringRequest(@NotNull String api, @NotNull String authorization,
@@ -120,8 +129,7 @@ public class SpaceService {
      *   for all the parent locations.
      */
     public ApiRequest<List<PublicHoliday>> getHolidays() {
-        return new BatchApiRequest<>("/api/http/public-holidays/holidays",
-                "GET", PublicHoliday.class);
+        return getBatch("/api/http/public-holidays/holidays", PublicHoliday.class);
     }
 
     /**
@@ -133,10 +141,8 @@ public class SpaceService {
      */
     @SuppressWarnings("unused")
     public ApiRequest<List<PublicHoliday>> getProfileHolidays(String memberId, LocalDate since, LocalDate till) {
-        return new ObjectApiRequest<List<PublicHoliday>>("/api/http/public-holidays/holidays/profile-holidays",
-                "GET", new TypeToken<List<PublicHoliday>>(){}.getType(),
-                DatatypeStructureDiscovery.structure(PublicHoliday.class)
-        ).addParameter("startDate", since).addParameter("endDate", till).addParameter("profile", memberId);
+        return getList("/api/http/public-holidays/holidays/profile-holidays", PublicHoliday.class)
+                .addParameter("startDate", since).addParameter("endDate", till).addParameter("profile", memberId);
     }
 
     /**
@@ -154,8 +160,7 @@ public class SpaceService {
      * @param viewMode One of "All", "WithAccessibleReasonUnapproved", or "WithAccessibleReasonAll"
      */
     public ApiRequest<List<AbsenceRecord>> getAbsences(String viewMode) {
-        return new BatchApiRequest<AbsenceRecord>("/api/http/absences", "GET", AbsenceRecord.class)
-                .addParameter("viewMode", viewMode);
+        return getBatch("/api/http/absences", AbsenceRecord.class).addParameter("viewMode", viewMode);
     }
 
     /**
@@ -163,49 +168,76 @@ public class SpaceService {
      *
      * Accepts the following optional filtering parameters:
      * "query", a string query, String.
-     * "reportPastMembers", whether to include the members who are no longer active, "true" or "false" String
+     * "reportPastMembers", whether to include the members who are no longer active, boolean.
      *
      */
     @SuppressWarnings("unused")
     public ApiRequest<List<TD_MemberProfile>> getProfiles() {
-        return new BatchApiRequest<>("/api/http/team-directory/profiles",
-                "GET", TD_MemberProfile.class);
+        return getBatch("/api/http/team-directory/profiles", TD_MemberProfile.class);
     }
 
     public ApiRequest<List<TD_MemberLocation>> getMemberLocations() {
-        return new BatchApiRequest<>("/api/http/team-directory/member-locations",
-                "GET", TD_MemberLocation.class);
-
+        return getBatch("/api/http/team-directory/member-locations", TD_MemberLocation.class);
     }
 
     @SuppressWarnings("unused")
     public ApiRequest<List<TD_WorkingDays>> getWorkingDays(String id) {
-        return new BatchApiRequest<>("/api/http/team-directory/profiles/id:" + id +  "/working-days",
-                "GET", TD_WorkingDays.class);
+        return getBatch("/api/http/team-directory/profiles/id:" + id +  "/working-days", TD_WorkingDays.class);
     }
 
     public ApiRequest<List<TD_ProfileWorkingDays>> getWorkingDays() {
-        return new BatchApiRequest<>("/api/http/team-directory/profiles/working-days",
-                "GET", TD_ProfileWorkingDays.class);
+        return getBatch("/api/http/team-directory/profiles/working-days", TD_ProfileWorkingDays.class);
     }
 
     @SuppressWarnings("unused")
     public ApiRequest<List<BusinessEntity>> getBusinessEntities() {
-        return new ObjectApiRequest<>("/api/http/hrm/business-entities", "GET",
-                new TypeToken<List<BusinessEntity>>(){}.getType(),
-                DatatypeStructureDiscovery.structure(BusinessEntity.class));
+        return getList("/api/http/hrm/business-entities", BusinessEntity.class);
     }
 
     public ApiRequest<List<BusinessEntityRelation>> getBusinessEntityRelations() {
-        return new BatchApiRequest<>("/api/http/hrm/business-entities/relations", "GET",
-                BusinessEntityRelation.class);
+        return getBatch("/api/http/hrm/business-entities/relations", BusinessEntityRelation.class);
     }
 
     @SuppressWarnings("unused")
     public ApiRequest<List<BusinessEntityRelation>> getBusinessEntityRelations(String memberId) {
-        return new ObjectApiRequest<>("/api/http/hrm/business-entities/relations/" + memberId,
-                "GET", new TypeToken<List<BusinessEntityRelation>>(){}.getType(),
-                DatatypeStructureDiscovery.structure(BusinessEntityRelation.class));
+        return getList("/api/http/hrm/business-entities/relations/" + memberId, BusinessEntityRelation.class);
+    }
+
+    /**
+     * The request to get an object from an arbitrary endpoint.
+     *
+     * @param endpoint the API endpoint, e.g. "/api/http/team-directory/profiles/abcdefghijkl"
+     * @param objectType The expected response type, e.g. `TD_MemberProfile.class`.
+     * @param <T> The response type.
+     */
+    @SuppressWarnings("unused")
+    public <T> ApiRequest<T> get(String endpoint, Class<T> objectType) {
+        return new ObjectApiRequest<>(endpoint, "GET", objectType,
+                DatatypeStructureDiscovery.structure(objectType));
+    }
+
+    /**
+     * The request to get a (non-batched) list from an arbitrary endpoint.
+     *
+     * @param endpoint the API endpoint, e.g. "/api/http/hrm/business-entities".
+     * @param elementType The expected list element type, e.g. `BusinessEntity.class`.
+     * @param <T> The list element type.
+     */
+    public <T> ApiRequest<List<T>> getList(String endpoint, Class<T> elementType) {
+        return new ObjectApiRequest<>(endpoint, "GET",
+                TypeToken.getParameterized(List.class, elementType).getType(),
+                DatatypeStructureDiscovery.structure(elementType));
+    }
+
+    /**
+     * The request to get a batched list from an arbitrary endpoint.
+     *
+     * @param endpoint the API endpoint, e.g. "/api/http/absences".
+     * @param elementType The expected list element type, e.g. `AbsenceRecord.class`.
+     * @param <T> The list element type.
+     */
+    public <T> ApiRequest<List<T>> getBatch(String endpoint, Class<T> elementType) {
+        return new BatchApiRequest<>(endpoint, "GET", elementType);
     }
 
     private class OAuthToken {
