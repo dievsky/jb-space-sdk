@@ -29,27 +29,28 @@ import java.util.Map;
  * Describes a Space service that allows to make API calls.
  *
  * The API requests correspond to the getter-style methods.
- * For example, the getHolidays() method queries the "/api/http/public-holidays/holidays" API endpoint.
+ * For example, {@link #getHolidays()} queries the "/api/http/public-holidays/holidays" API endpoint.
  *
  * Required request parameters correspond to the method parameters.
- * For example, the getProfileHolidays(...) method accepts three parameters,
+ * For example, {@link #getProfileHolidays(String, LocalDate, LocalDate)} accepts three parameters,
  * because the "/api/http/public-holidays/holidays/profile-holidays" endpoint has three required parameters.
  *
- * Optional parameters can be supplied to the request using addParameter or addParameterList.
+ * Optional request parameters can be supplied using {@link ApiRequest#addParameter}
+ * or {@link ApiRequest#addParameterList}.
  * For example, to add an optional parameter "since" to an "/api/http/team-directory/member-locations" query,
- * use getMemberLocations().addParameter("since", date).
+ * use {@code getMemberLocations().addParameter("since", date)}.
  * These methods follow the builder pattern and can be chained.
  *
- * To control the output fields, use addField and addRecursiveField methods.
+ * To control the output fields, use {@link ApiRequest#addField} and {@link ApiRequest#addRecursiveField}.
  *
  * Our library handles the pagination and chunking of parameter lists internally.
  * It also implicitly requests and refreshes the OAuth token as needed.
  *
- * If your favorite endpoint is not implemented yet, you can construct thr request yourself with get* methods!
+ * If your favorite endpoint is not implemented yet, you can construct the request yourself with get* methods!
  * There are three types of Space API GET queries. Queries can return:
- * - a single object. Constructed using `get()`.
- * - a list of objects. Constructed using `getList()`.
- * - a batch of objects (a part of the list). Constructed using `getBatch()`.
+ * - a single object. Constructed using {@link #getObject}.
+ * - a list of objects. Constructed using {@link #getList}.
+ * - a batch of objects (a part of the list). Constructed using {@link #getBatch}.
  */
 public class SpaceService {
 
