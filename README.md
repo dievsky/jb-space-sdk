@@ -55,8 +55,8 @@ Map<String, Integer> daysWorkedFromHome = new HashMap<>();
 for (AbsenceRecord absence : absences) {
     if (absence.reason.name.equals("Offsite")) {
         String employeeName = absence.member.name.lastName + " " + absence.member.name.firstName;
-        // daysUntil presumes that the end date is exclusive, hence + 1
-        int days = (int) (absence.since.until(absence.till, DAYS) + 1);
+        // until presumes that the end date is exclusive, hence + 1
+        int days = (int) (absence.since.until(absence.till, ChronoUnit.DAYS) + 1);
         daysWorkedFromHome.compute(employeeName, (key, value) -> {
             if (value == null) {
                 return days;
