@@ -12,16 +12,15 @@ public class SpaceQueryParameters {
     private SpaceQueryParameters() {
     }
 
-    @NotNull
-    public static String toPostBody(Map<String, Object> parameterMap) {
+    public static @NotNull String toPostBody(@NotNull Map<String, Object> parameterMap) {
         if (parameterMap.isEmpty()) {
             return "";
         }
         return SpaceService.GSON.toJson(parameterMap);
     }
 
-    @NotNull
-    public static String toQueryParameters(Map<String, Object> parameterMap) {
+
+    public static @NotNull String toQueryParameters(@NotNull Map<String, Object> parameterMap) {
         if (parameterMap.isEmpty()) {
             return "";
         }
@@ -42,7 +41,7 @@ public class SpaceQueryParameters {
         return builder.toString();
     }
 
-    private static void appendKeyValue(StringBuilder builder, String key, String value) {
+    private static void appendKeyValue(@NotNull StringBuilder builder, @NotNull String key, @NotNull String value) {
         builder.append(URLEncoder.encode(key, StandardCharsets.UTF_8)).append("=")
                 .append(URLEncoder.encode(value, StandardCharsets.UTF_8)).append("&");
     }

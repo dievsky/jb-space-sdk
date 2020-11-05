@@ -77,11 +77,11 @@ public class SpaceService {
         httpClient = HttpClient.newBuilder().build();
     }
 
-    private URI uri(@NotNull String endpoint) {
+    private @NotNull URI uri(@NotNull String endpoint) {
         return URI.create("https://" + domain + endpoint);
     }
 
-    private URI uri(@NotNull String endpoint, @NotNull Map<String, Object> payload) {
+    private @NotNull URI uri(@NotNull String endpoint, @NotNull Map<String, Object> payload) {
         return URI.create("https://" + domain + endpoint + SpaceQueryParameters.toQueryParameters(payload));
     }
 
@@ -98,8 +98,8 @@ public class SpaceService {
      * @throws IOException if the HTTP request throws it.
      * @throws InterruptedException if the HTTP request throws it.
      */
-    JsonElement rawJSONQuery(@NotNull String endpoint, @NotNull String method,
-                             @NotNull Map<String, Object> payload) throws IOException, InterruptedException {
+    @NotNull JsonElement rawJSONQuery(@NotNull String endpoint, @NotNull String method,
+                                      @NotNull Map<String, Object> payload) throws IOException, InterruptedException {
         var builder = HttpRequest.newBuilder().header("Accept", "application/json");
         if ("GET".equals(method)) {
             builder.method("GET", HttpRequest.BodyPublishers.noBody()).uri(uri(endpoint, payload));
@@ -110,7 +110,7 @@ public class SpaceService {
         return rawJSONQuery(builder, Authorization.BEARER);
     }
 
-    private JsonElement rawJSONQuery(@NotNull HttpRequest.Builder builder,
+    private @NotNull JsonElement rawJSONQuery(@NotNull HttpRequest.Builder builder,
                                      @NotNull Authorization authorization) throws IOException, InterruptedException {
         applyAuthorization(builder, authorization);
         final HttpRequest request = builder.build();
@@ -166,7 +166,7 @@ public class SpaceService {
      * - "location", the ID of a location, String. Note that the result will also include the holidays
      *   for all the parent locations.
      */
-    public ApiRequest<List<PublicHoliday>> getHolidays() {
+    public @NotNull ApiRequest<List<PublicHoliday>> getHolidays() {
         return getBatch("/api/http/public-holidays/holidays", PublicHoliday.class);
     }
 
@@ -178,7 +178,8 @@ public class SpaceService {
      * @param till end date, inclusive, LocalDate.
      */
     @SuppressWarnings("unused")
-    public ApiRequest<List<PublicHoliday>> getProfileHolidays(String memberId, LocalDate since, LocalDate till) {
+    public @NotNull ApiRequest<List<PublicHoliday>> getProfileHolidays(String memberId,
+                                                                       LocalDate since, LocalDate till) {
         return getList("/api/http/public-holidays/holidays/profile-holidays", PublicHoliday.class)
                 .addParameter("startDate", since).addParameter("endDate", till).addParameter("profile", memberId);
     }
@@ -197,7 +198,7 @@ public class SpaceService {
      *
      * @param viewMode One of "All", "WithAccessibleReasonUnapproved", or "WithAccessibleReasonAll"
      */
-    public ApiRequest<List<AbsenceRecord>> getAbsences(String viewMode) {
+    public @NotNull ApiRequest<List<AbsenceRecord>> getAbsences(String viewMode) {
         return getBatch("/api/http/absences", AbsenceRecord.class).addParameter("viewMode", viewMode);
     }
 
@@ -210,34 +211,34 @@ public class SpaceService {
      *
      */
     @SuppressWarnings("unused")
-    public ApiRequest<List<TD_MemberProfile>> getProfiles() {
+    public @NotNull ApiRequest<List<TD_MemberProfile>> getProfiles() {
         return getBatch("/api/http/team-directory/profiles", TD_MemberProfile.class);
     }
 
-    public ApiRequest<List<TD_MemberLocation>> getMemberLocations() {
+    public @NotNull ApiRequest<List<TD_MemberLocation>> getMemberLocations() {
         return getBatch("/api/http/team-directory/member-locations", TD_MemberLocation.class);
     }
 
     @SuppressWarnings("unused")
-    public ApiRequest<List<TD_WorkingDays>> getWorkingDays(String id) {
+    public @NotNull ApiRequest<List<TD_WorkingDays>> getWorkingDays(String id) {
         return getBatch("/api/http/team-directory/profiles/id:" + id +  "/working-days", TD_WorkingDays.class);
     }
 
-    public ApiRequest<List<TD_ProfileWorkingDays>> getWorkingDays() {
+    public @NotNull ApiRequest<List<TD_ProfileWorkingDays>> getWorkingDays() {
         return getBatch("/api/http/team-directory/profiles/working-days", TD_ProfileWorkingDays.class);
     }
 
     @SuppressWarnings("unused")
-    public ApiRequest<List<BusinessEntity>> getBusinessEntities() {
+    public @NotNull ApiRequest<List<BusinessEntity>> getBusinessEntities() {
         return getList("/api/http/hrm/business-entities", BusinessEntity.class);
     }
 
-    public ApiRequest<List<BusinessEntityRelation>> getBusinessEntityRelations() {
+    public @NotNull ApiRequest<List<BusinessEntityRelation>> getBusinessEntityRelations() {
         return getBatch("/api/http/hrm/business-entities/relations", BusinessEntityRelation.class);
     }
 
     @SuppressWarnings("unused")
-    public ApiRequest<List<BusinessEntityRelation>> getBusinessEntityRelations(String memberId) {
+    public @NotNull ApiRequest<List<BusinessEntityRelation>> getBusinessEntityRelations(String memberId) {
         return getList("/api/http/hrm/business-entities/relations/" + memberId, BusinessEntityRelation.class);
     }
 
@@ -249,7 +250,7 @@ public class SpaceService {
      * @param <T> The response type.
      */
     @SuppressWarnings("unused")
-    public <T> ApiRequest<T> getObject(String endpoint, Class<T> objectType) {
+    public <T> @NotNull ApiRequest<T> getObject(String endpoint, Class<T> objectType) {
         return new ObjectApiRequest<>(this, endpoint, "GET", objectType,
                 DatatypeStructureDiscovery.structure(objectType));
     }
@@ -261,7 +262,7 @@ public class SpaceService {
      * @param elementType The expected list element type, e.g. `BusinessEntity.class`.
      * @param <T> The list element type.
      */
-    public <T> ApiRequest<List<T>> getList(String endpoint, Class<T> elementType) {
+    public <T> @NotNull ApiRequest<List<T>> getList(String endpoint, Class<T> elementType) {
         return new ObjectApiRequest<>(this, endpoint, "GET",
                 TypeToken.getParameterized(List.class, elementType).getType(),
                 DatatypeStructureDiscovery.structure(elementType));
@@ -274,7 +275,7 @@ public class SpaceService {
      * @param elementType The expected list element type, e.g. `AbsenceRecord.class`.
      * @param <T> The list element type.
      */
-    public <T> ApiRequest<List<T>> getBatch(String endpoint, Class<T> elementType) {
+    public <T> @NotNull ApiRequest<List<T>> getBatch(String endpoint, Class<T> elementType) {
         return new BatchApiRequest<>(this, endpoint, "GET", elementType);
     }
 

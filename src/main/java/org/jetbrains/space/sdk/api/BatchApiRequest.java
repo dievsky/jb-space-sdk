@@ -1,6 +1,7 @@
 package org.jetbrains.space.sdk.api;
 
 import com.google.gson.reflect.TypeToken;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.space.sdk.datatype.BatchResponse;
 import org.jetbrains.space.sdk.datatype.DatatypeStructureDiscovery;
 
@@ -26,25 +27,25 @@ class BatchApiRequest<T> implements ApiRequest<List<T>> {
   }
 
   @Override
-  public BatchApiRequest<T> addParameter(String key, String value) {
+  public @NotNull ApiRequest<List<T>> addParameter(@NotNull String key, @NotNull String value) {
     request.addParameter(key, value);
     return this;
   }
 
   @Override
-  public BatchApiRequest<T> addField(String fieldName, String... fieldNames) {
+  public @NotNull ApiRequest<List<T>> addField(@NotNull String fieldName, String... fieldNames) {
     request.addField("data", concatStrings(fieldName, fieldNames));
     return this;
   }
 
   @Override
-  public BatchApiRequest<T> addRecursiveField(String fieldName, String... fieldNames) {
+  public @NotNull ApiRequest<List<T>> addRecursiveField(@NotNull String fieldName, String... fieldNames) {
     request.addRecursiveField("data", concatStrings(fieldName, fieldNames));
     return this;
   }
 
   @Override
-  public BatchApiRequest<T> addParameterList(String key, Collection<String> values) {
+  public @NotNull ApiRequest<List<T>> addParameterList(@NotNull String key, @NotNull Collection<String> values) {
     if (multiparameterKey != null) {
       throw new IllegalStateException("only one multi-value parameter can be supplied");
     }
@@ -57,7 +58,7 @@ class BatchApiRequest<T> implements ApiRequest<List<T>> {
     BatchResponse<T> batchResponse = request.execute();
     var res = new ArrayList<>(batchResponse.data);
     String next = "!" + batchResponse.next;
-    while (next != null && !next.equals(batchResponse.next) && res.size() != batchResponse.totalCount) {
+    while (!next.equals(batchResponse.next) && res.size() != batchResponse.totalCount) {
       next = batchResponse.next;
       request.doAddParameter("$skip", next);
       batchResponse = request.execute();
@@ -67,7 +68,7 @@ class BatchApiRequest<T> implements ApiRequest<List<T>> {
   }
 
   @Override
-  public List<T> execute() throws IOException, InterruptedException {
+  public @NotNull List<T> execute() throws IOException, InterruptedException {
     if (multiparameterKey == null) {
       return doExecute();
     }
