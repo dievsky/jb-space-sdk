@@ -2,8 +2,6 @@ package org.jetbrains.space.sdk.api;
 
 import org.jetbrains.space.sdk.fields.DatatypeStructure;
 import org.jetbrains.space.sdk.fields.FieldSpecs;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -19,8 +17,6 @@ class ObjectApiRequest<T> implements ApiRequest<T> {
   private final Type type;
   private final Map<String, Object> parameterMap = new HashMap<>();
   private final FieldSpecs specs;
-
-  private final static Logger LOGGER = LoggerFactory.getLogger(ObjectApiRequest.class);
 
   ObjectApiRequest(SpaceService spaceService, String endpoint, String method, Type type, DatatypeStructure structure) {
     this.spaceService = spaceService;
