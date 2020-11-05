@@ -46,4 +46,8 @@ public class TD_MemberProfile implements SpaceObject {
         return null;
     }
 
+    @Override
+    public String toString() {
+        return "TD_MemberProfile{id='" + id + '\'' + ", name=" + name + '}';
+    }
 }

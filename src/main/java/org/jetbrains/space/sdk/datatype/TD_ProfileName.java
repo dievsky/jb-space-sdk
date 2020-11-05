@@ -10,4 +10,8 @@ public class TD_ProfileName implements SpaceObject {
         this.lastName = lastName;
     }
 
+    @Override
+    public String toString() {
+        return firstName + " " + lastName;
+    }
 }
