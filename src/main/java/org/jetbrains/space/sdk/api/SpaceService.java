@@ -178,8 +178,8 @@ public class SpaceService {
      * @param till end date, inclusive, LocalDate.
      */
     @SuppressWarnings("unused")
-    public @NotNull ApiRequest<List<PublicHoliday>> getProfileHolidays(String memberId,
-                                                                       LocalDate since, LocalDate till) {
+    public @NotNull ApiRequest<List<PublicHoliday>> getProfileHolidays(
+            @NotNull String memberId, @NotNull LocalDate since, @NotNull LocalDate till) {
         return getList("/api/http/public-holidays/holidays/profile-holidays", PublicHoliday.class)
                 .addParameter("startDate", since).addParameter("endDate", till).addParameter("profile", memberId);
     }
@@ -198,7 +198,7 @@ public class SpaceService {
      *
      * @param viewMode One of "All", "WithAccessibleReasonUnapproved", or "WithAccessibleReasonAll"
      */
-    public @NotNull ApiRequest<List<AbsenceRecord>> getAbsences(String viewMode) {
+    public @NotNull ApiRequest<List<AbsenceRecord>> getAbsences(@NotNull String viewMode) {
         return getBatch("/api/http/absences", AbsenceRecord.class).addParameter("viewMode", viewMode);
     }
 
@@ -220,7 +220,7 @@ public class SpaceService {
     }
 
     @SuppressWarnings("unused")
-    public @NotNull ApiRequest<List<TD_WorkingDays>> getWorkingDays(String id) {
+    public @NotNull ApiRequest<List<TD_WorkingDays>> getWorkingDays(@NotNull String id) {
         return getBatch("/api/http/team-directory/profiles/id:" + id +  "/working-days", TD_WorkingDays.class);
     }
 
@@ -238,7 +238,7 @@ public class SpaceService {
     }
 
     @SuppressWarnings("unused")
-    public @NotNull ApiRequest<List<BusinessEntityRelation>> getBusinessEntityRelations(String memberId) {
+    public @NotNull ApiRequest<List<BusinessEntityRelation>> getBusinessEntityRelations(@NotNull String memberId) {
         return getList("/api/http/hrm/business-entities/relations/" + memberId, BusinessEntityRelation.class);
     }
 
@@ -250,7 +250,7 @@ public class SpaceService {
      * @param <T> The response type.
      */
     @SuppressWarnings("unused")
-    public <T> @NotNull ApiRequest<T> getObject(String endpoint, Class<T> objectType) {
+    public <T> @NotNull ApiRequest<T> getObject(@NotNull String endpoint, @NotNull Class<T> objectType) {
         return new ObjectApiRequest<>(this, endpoint, "GET", objectType,
                 DatatypeStructureDiscovery.structure(objectType));
     }
@@ -262,7 +262,7 @@ public class SpaceService {
      * @param elementType The expected list element type, e.g. `BusinessEntity.class`.
      * @param <T> The list element type.
      */
-    public <T> @NotNull ApiRequest<List<T>> getList(String endpoint, Class<T> elementType) {
+    public <T> @NotNull ApiRequest<List<T>> getList(@NotNull String endpoint, @NotNull Class<T> elementType) {
         return new ObjectApiRequest<>(this, endpoint, "GET",
                 TypeToken.getParameterized(List.class, elementType).getType(),
                 DatatypeStructureDiscovery.structure(elementType));
@@ -275,7 +275,7 @@ public class SpaceService {
      * @param elementType The expected list element type, e.g. `AbsenceRecord.class`.
      * @param <T> The list element type.
      */
-    public <T> @NotNull ApiRequest<List<T>> getBatch(String endpoint, Class<T> elementType) {
+    public <T> @NotNull ApiRequest<List<T>> getBatch(@NotNull String endpoint, @NotNull Class<T> elementType) {
         return new BatchApiRequest<>(this, endpoint, "GET", elementType);
     }
 
@@ -308,12 +308,12 @@ public class SpaceService {
 
     private static final TypeAdapter<LocalDate> LOCAL_DATE_TYPE_ADAPTER = new TypeAdapter<>() {
         @Override
-        public void write(JsonWriter out, LocalDate value) throws IOException {
+        public void write(@NotNull JsonWriter out, @NotNull LocalDate value) throws IOException {
             out.value(value.format(DateTimeFormatter.ISO_DATE));
         }
 
         @Override
-        public LocalDate read(JsonReader in) throws IOException {
+        public @Nullable LocalDate read(@NotNull JsonReader in) throws IOException {
             if (in.peek().equals(JsonToken.STRING)) {
                 return LocalDate.parse(in.nextString(), DateTimeFormatter.ISO_DATE);
             }

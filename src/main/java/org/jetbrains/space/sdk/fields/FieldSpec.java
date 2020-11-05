@@ -1,24 +1,26 @@
 package org.jetbrains.space.sdk.fields;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Represents a field specification as passed to Space HTTP API via $fields query parameter.
  */
 public class FieldSpec {
 
-    private final FieldSpecs nested;
+    private final @NotNull FieldSpecs nested;
     private final boolean recursive;
 
-    public FieldSpecs getNested() {
+    public @NotNull FieldSpecs getNested() {
         return nested;
     }
 
-    FieldSpec(FieldSpecs nested, boolean recursive) {
+    FieldSpec(@NotNull FieldSpecs nested, boolean recursive) {
         this.nested = nested;
         this.recursive = recursive;
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         if (recursive) {
             return "!";
         }

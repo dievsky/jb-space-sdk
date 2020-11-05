@@ -1,5 +1,7 @@
 package org.jetbrains.space.sdk.fields;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 
 /**
@@ -17,15 +19,15 @@ public class FieldSpecs {
     /**
      * Named fields from the query. Named fields each have their own FieldSpec specification, which defaults to "*".
      */
-    private final Map<String, FieldSpec> specs;
+    private final @NotNull Map<String, FieldSpec> specs;
 
     /**
      * The full structure of the corresponding API object, describing all possible fields. Used to check
      * the correctness of the "addField" requests.
      */
-    private final DatatypeStructure structure;
+    private final @NotNull DatatypeStructure structure;
 
-    public FieldSpecs(boolean wildcard, Map<String, FieldSpec> specs, DatatypeStructure structure) {
+    public FieldSpecs(boolean wildcard, @NotNull Map<String, FieldSpec> specs, @NotNull DatatypeStructure structure) {
         this.wildcard = wildcard;
         this.specs = specs;
         this.structure = structure;
@@ -39,7 +41,7 @@ public class FieldSpecs {
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         var res = new ArrayList<String>();
         if (wildcard) {
             res.add("*");
@@ -57,7 +59,7 @@ public class FieldSpecs {
      * @return whether the field will be serialized under the current specifications.
      */
     @SuppressWarnings("unused")
-    public boolean fieldWillBeSerialized(String fieldName, String... fieldNames) {
+    public boolean fieldWillBeSerialized(@NotNull String fieldName, @NotNull String... fieldNames) {
         if (!structure.hasField(fieldName, fieldNames)) {
             return false;
         }
@@ -84,7 +86,7 @@ public class FieldSpecs {
         return false;
     }
 
-    private void addField(boolean recursive, String fieldName, String... fieldNames) {
+    private void addField(boolean recursive, @NotNull String fieldName, @NotNull String... fieldNames) {
         if (!structure.hasField(fieldName, fieldNames)) {
             throw new NoSuchElementException();
         }
@@ -109,7 +111,7 @@ public class FieldSpecs {
      * @param fieldName  the immediate field name
      * @param fieldNames the nested field sequence, if any
      */
-    public void addField(String fieldName, String... fieldNames) {
+    public void addField(@NotNull String fieldName, @NotNull String... fieldNames) {
         addField(false, fieldName, fieldNames);
     }
 
@@ -118,7 +120,7 @@ public class FieldSpecs {
      * @param fieldName  the immediate field name
      * @param fieldNames the nested field sequence, if any
      */
-    public void addRecursiveField(String fieldName, String... fieldNames) {
+    public void addRecursiveField(@NotNull String fieldName, @NotNull String... fieldNames) {
         addField(true, fieldName, fieldNames);
     }
 }

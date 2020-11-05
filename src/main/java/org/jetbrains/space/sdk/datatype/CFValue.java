@@ -28,6 +28,7 @@ public class CFValue implements SpaceObject {
     return value;
   }
 
+  @SuppressWarnings("unused")
   public @Nullable List<?> getValues() {
     return values;
   }
@@ -36,7 +37,7 @@ public class CFValue implements SpaceObject {
    * Try to cast this CFValue object to a more specific type based on the className field.
    * @return a CFValue of a more specific type, or this.
    */
-  public CFValue cast() {
+  public @NotNull CFValue cast() {
     if ("StringCFValue".equals(className)) {
       return new StringCFValue((String) value);
     } else {
@@ -44,10 +45,10 @@ public class CFValue implements SpaceObject {
     }
   }
 
-  public static TypeAdapterFactory ADAPTER_FACTORY = new TypeAdapterFactory() {
+  public static @NotNull TypeAdapterFactory ADAPTER_FACTORY = new TypeAdapterFactory() {
     @SuppressWarnings("unchecked")
     @Override
-    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+    public <T> @Nullable TypeAdapter<T> create(@NotNull Gson gson, @NotNull TypeToken<T> type) {
       if (type.getType().equals(CFValue.class)) {
         final TypeAdapter<CFValue> delegateAdapter = (TypeAdapter<CFValue>) gson.getDelegateAdapter(this, type);
         return (TypeAdapter<T>) new TypeAdapter<CFValue>() {
@@ -57,8 +58,13 @@ public class CFValue implements SpaceObject {
           }
 
           @Override
-          public CFValue read(JsonReader in) throws IOException {
-            return delegateAdapter.read(in).cast();
+          public @Nullable CFValue read(JsonReader in) throws IOException {
+            final CFValue raw = delegateAdapter.read(in);
+            if (raw != null) {
+              return raw.cast();
+            } else {
+              return null;
+            }
           }
         };
       } else {

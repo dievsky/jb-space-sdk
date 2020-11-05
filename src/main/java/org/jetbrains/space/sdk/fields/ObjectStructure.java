@@ -1,18 +1,20 @@
 package org.jetbrains.space.sdk.fields;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Arrays;
 import java.util.Map;
 
 public abstract class ObjectStructure implements DatatypeStructure {
 
-    protected final Map<String, DatatypeStructure> fields;
+    protected final @NotNull Map<String, DatatypeStructure> fields;
 
-    public ObjectStructure(Map<String, DatatypeStructure> fields) {
+    public ObjectStructure(@NotNull Map<String, DatatypeStructure> fields) {
         this.fields = fields;
     }
 
     @Override
-    public boolean hasField(String fieldName, String... fieldNames) {
+    public boolean hasField(@NotNull String fieldName, @NotNull String... fieldNames) {
         if (!fields.containsKey(fieldName)) {
             return false;
         }
@@ -25,7 +27,7 @@ public abstract class ObjectStructure implements DatatypeStructure {
     }
 
     @Override
-    public DatatypeStructure getField(String fieldName, String... fieldNames) {
+    public @NotNull DatatypeStructure getField(@NotNull String fieldName, @NotNull String... fieldNames) {
         final DatatypeStructure structure = fields.get(fieldName);
         if (fieldNames.length == 0) {
             return structure;

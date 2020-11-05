@@ -1,16 +1,18 @@
 package org.jetbrains.space.sdk.fields;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Arrays;
 import java.util.Map;
 
 public class LiteralObjectStructure extends ObjectStructure {
 
-    public LiteralObjectStructure(Map<String, DatatypeStructure> fields) {
+    public LiteralObjectStructure(@NotNull Map<String, DatatypeStructure> fields) {
         super(fields);
     }
 
     @Override
-    public boolean wildcardSerializable(String fieldName, String... fieldNames) {
+    public boolean wildcardSerializable(@NotNull String fieldName, @NotNull String... fieldNames) {
         if (!hasField(fieldName, fieldNames)) {
             return false;
         }

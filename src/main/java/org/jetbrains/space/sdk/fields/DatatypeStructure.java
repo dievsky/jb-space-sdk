@@ -1,5 +1,7 @@
 package org.jetbrains.space.sdk.fields;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.NoSuchElementException;
 
 /**
@@ -19,7 +21,7 @@ public interface DatatypeStructure {
      */
     boolean wildcardSerializable(String fieldName, String... fieldNames);
 
-    DatatypeStructure getField(String fieldName, String... fieldNames);
+    @NotNull DatatypeStructure getField(String fieldName, String... fieldNames);
 
     /**
      * A primitive is an entity whose fields, if any, cannot be specified in a request.
@@ -39,7 +41,7 @@ public interface DatatypeStructure {
         }
 
         @Override
-        public DatatypeStructure getField(String fieldName, String... fieldNames) {
+        public @NotNull DatatypeStructure getField(String fieldName, String... fieldNames) {
             throw new NoSuchElementException();
         }
     };

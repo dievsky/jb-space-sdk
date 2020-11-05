@@ -2,6 +2,7 @@ package org.jetbrains.space.sdk.api;
 
 import com.google.gson.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.space.sdk.datatype.BatchResponse;
 import org.jetbrains.space.sdk.datatype.DatatypeStructureDiscovery;
 
@@ -15,10 +16,10 @@ class BatchApiRequest<T> implements ApiRequest<List<T>> {
 
   private final static int CHUNK_SIZE = 20;
 
-  protected String multiparameterKey = null;
-  protected List<String> multiparameterValues = null;
+  protected @Nullable String multiparameterKey = null;
+  protected @Nullable List<String> multiparameterValues = null;
 
-  protected final ObjectApiRequest<BatchResponse<T>> request;
+  protected final @NotNull ObjectApiRequest<BatchResponse<T>> request;
 
   BatchApiRequest(@NotNull SpaceService spaceService, @NotNull String api, @NotNull String method,
                   @NotNull Type elementType) {
@@ -34,13 +35,13 @@ class BatchApiRequest<T> implements ApiRequest<List<T>> {
   }
 
   @Override
-  public @NotNull ApiRequest<List<T>> addField(@NotNull String fieldName, String... fieldNames) {
+  public @NotNull ApiRequest<List<T>> addField(@NotNull String fieldName, @NotNull String... fieldNames) {
     request.addField("data", concatStrings(fieldName, fieldNames));
     return this;
   }
 
   @Override
-  public @NotNull ApiRequest<List<T>> addRecursiveField(@NotNull String fieldName, String... fieldNames) {
+  public @NotNull ApiRequest<List<T>> addRecursiveField(@NotNull String fieldName, @NotNull String... fieldNames) {
     request.addRecursiveField("data", concatStrings(fieldName, fieldNames));
     return this;
   }
@@ -70,7 +71,7 @@ class BatchApiRequest<T> implements ApiRequest<List<T>> {
 
   @Override
   public @NotNull List<T> execute() throws IOException, InterruptedException {
-    if (multiparameterKey == null) {
+    if (multiparameterKey == null || multiparameterValues == null) {
       return doExecute();
     }
 
@@ -90,7 +91,7 @@ class BatchApiRequest<T> implements ApiRequest<List<T>> {
     return res;
   }
 
-  private String[] concatStrings(String v, String[] a) {
+  private @NotNull String[] concatStrings(String v, @NotNull String[] a) {
     String[] fields = new String[a.length + 1];
     fields[0] = v;
     System.arraycopy(a, 0, fields, 1, a.length);
