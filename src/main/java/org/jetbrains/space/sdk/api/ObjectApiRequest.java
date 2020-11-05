@@ -14,7 +14,7 @@ import java.util.Map;
 class ObjectApiRequest<T> implements ApiRequest<T> {
 
   private final SpaceService spaceService;
-  private final String api;
+  private final String endpoint;
   private final String method;
   private final Type type;
   private final Map<String, Object> parameterMap = new HashMap<>();
@@ -22,9 +22,9 @@ class ObjectApiRequest<T> implements ApiRequest<T> {
 
   private final static Logger LOGGER = LoggerFactory.getLogger(ObjectApiRequest.class);
 
-  ObjectApiRequest(SpaceService spaceService, String api, String method, Type type, DatatypeStructure structure) {
+  ObjectApiRequest(SpaceService spaceService, String endpoint, String method, Type type, DatatypeStructure structure) {
     this.spaceService = spaceService;
-    this.api = api;
+    this.endpoint = endpoint;
     this.method = method;
     this.type = type;
     specs = new FieldSpecs(true, new HashMap<>(), structure);
@@ -62,11 +62,7 @@ class ObjectApiRequest<T> implements ApiRequest<T> {
 
   @Override
   public T execute() throws IOException, InterruptedException {
-    long start = System.currentTimeMillis();
     doAddParameter("$fields", specs.toString());
-    var builder = spaceService.keyValueRequest(api, method, parameterMap);
-    final T res = SpaceService.GSON.fromJson(spaceService.rawQuery(builder), type);
-    LOGGER.debug("Queried {} in {} ms", builder.build().uri(), System.currentTimeMillis() - start);
-    return res;
+    return SpaceService.GSON.fromJson(spaceService.rawJSONQuery(endpoint, method, parameterMap), type);
   }
 }

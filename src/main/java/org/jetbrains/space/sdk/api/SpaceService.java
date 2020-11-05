@@ -8,6 +8,8 @@ import com.google.gson.stream.JsonWriter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.space.sdk.datatype.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -58,6 +60,7 @@ public class SpaceService {
     private final HttpClient httpClient;
 
     private static final int SERVER_ERROR_RETRIES = 2;
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpaceService.class);
 
     /**
      * @param domain the domain name of the Space server, e.g. "jetbrains.team".
@@ -72,34 +75,29 @@ public class SpaceService {
         httpClient = HttpClient.newBuilder().build();
     }
 
-    private HttpRequest.Builder stringRequest(@NotNull String endpoint, @NotNull String method,
-                                              @NotNull String payload) {
-        return HttpRequest.newBuilder()
-                .method(method, HttpRequest.BodyPublishers.ofString(payload))
-                .header("Content-Type", "text/plain")
-                .header("Accept", "application/json")
-                .uri(URI.create("https://" + domain + endpoint));
+    private URI uri(@NotNull String endpoint) {
+        return URI.create("https://" + domain + endpoint);
     }
 
-    HttpRequest.Builder keyValueRequest(@NotNull String endpoint, @NotNull String method,
-                                        @NotNull Map<String, Object> payload) {
-        var res = stringRequest(endpoint, method, SpaceQueryParameters.toPostBody(payload));
+    private URI uri(@NotNull String endpoint, @NotNull Map<String, Object> payload) {
+        return URI.create("https://" + domain + endpoint + SpaceQueryParameters.toQueryParameters(payload));
+    }
+
+    JsonElement rawJSONQuery(@NotNull String endpoint, @NotNull String method,
+                             @NotNull Map<String, Object> payload) throws IOException, InterruptedException {
+        var res = HttpRequest.newBuilder().header("Accept", "application/json");
         if ("GET".equals(method)) {
-            // we have to encode the body in the URL instead
             res.method("GET", HttpRequest.BodyPublishers.noBody())
-                    .uri(URI.create("https://" + domain + endpoint + SpaceQueryParameters.toQueryParameters(payload)));
+                    .uri(uri(endpoint,payload));
         } else {
-            res.setHeader("Content-Type", "application/json");
+            res.method(method, HttpRequest.BodyPublishers.ofString(SpaceQueryParameters.toPostBody(payload)))
+                    .uri(uri(endpoint)).setHeader("Content-Type", "application/json");
         }
-        return res;
+        return rawJSONQuery(res, Authorization.BEARER);
     }
 
-    JsonElement rawQuery(HttpRequest.Builder builder) throws IOException, InterruptedException {
-        return rawQuery(builder, Authorization.BEARER);
-    }
-
-    private JsonElement rawQuery(HttpRequest.Builder builder,
-                                 Authorization authorization) throws IOException, InterruptedException {
+    private JsonElement rawJSONQuery(HttpRequest.Builder builder,
+                                     Authorization authorization) throws IOException, InterruptedException {
         HttpResponse<String> response = null;
         switch (authorization) {
             case BASIC:
@@ -112,20 +110,27 @@ public class SpaceService {
                 builder.setHeader("Authorization", "Bearer " + oauth.token);
                 break;
         }
+        final HttpRequest request = builder.build();
+        long start = System.currentTimeMillis();
         for (int i = 0; i <= SERVER_ERROR_RETRIES; i++) {
-            response = httpClient.send(builder.build(), HttpResponse.BodyHandlers.ofString());
+            LOGGER.trace("Querying {}, attempt {}", request.uri(), i + 1);
+            response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             int statusCode = response.statusCode();
             if (statusCode != 200) {
                 if (statusCode >= 500 && statusCode < 600) {
                     // server-side error, wait and retry
                     Thread.sleep(200);
+                    LOGGER.trace("Response {}, retrying", statusCode);
                     continue;
                 } else {
+                    LOGGER.trace("Response {}, giving up", statusCode);
                     break;
                 }
             }
+            LOGGER.debug("Queried {} in {} ms", request.uri(), System.currentTimeMillis() - start);
             return JsonParser.parseString(response.body());
         }
+        LOGGER.error("Failed to query {} in {} ms", request.uri(), System.currentTimeMillis() - start);
         throw new RuntimeException(String.valueOf(response));
     }
 
@@ -268,10 +273,13 @@ public class SpaceService {
         }
 
         private void refresh() throws IOException, InterruptedException {
-            var requestBuilder = stringRequest("/oauth/token", "POST",
-                    "grant_type=client_credentials&scope=**");
-            requestBuilder.setHeader("Content-Type", "application/x-www-form-urlencoded");
-            JsonElement response = rawQuery(requestBuilder, Authorization.BASIC);
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(uri("/oauth/token"))
+                    .setHeader("Accept", "application/json")
+                    .method("POST",
+                            HttpRequest.BodyPublishers.ofString("grant_type=client_credentials&scope=**"))
+                    .setHeader("Content-Type", "application/x-www-form-urlencoded");
+            JsonElement response = rawJSONQuery(requestBuilder, Authorization.BASIC);
             token = response.getAsJsonObject().get("access_token").getAsString();
             expires = LocalDateTime.now().plus(response.getAsJsonObject().get("expires_in").getAsInt(),
                     ChronoUnit.SECONDS);
