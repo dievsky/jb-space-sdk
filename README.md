@@ -83,5 +83,5 @@ Now it should work!
 
 This code does have a few issues more (`execute()` can throw an uncaught exception,
 we ignore the employees that never worked from home in 2020, we don't deal the employees
-with the same name etc., we don't take into account the absences that start before or end after 2020),
+with the same name, we don't take into account the absences that start before or end after 2020 etc.),
 but fixing these is left as an exercise to the reader.
