@@ -1,5 +1,6 @@
 package org.jetbrains.space.sdk.datatype;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.space.sdk.fields.DatatypeStructure;
 import org.jetbrains.space.sdk.fields.LiteralObjectStructure;
 
@@ -9,7 +10,7 @@ import java.util.Map;
 
 public class BatchResponse<T> {
 
-    public static DatatypeStructure structure(DatatypeStructure elementStructure) {
+    public static @NotNull DatatypeStructure structure(@NotNull DatatypeStructure elementStructure) {
         Map<String, DatatypeStructure> fields = new HashMap<>();
         fields.put("next", DatatypeStructure.PRIMITIVE);
         fields.put("totalCount", DatatypeStructure.PRIMITIVE);
@@ -17,11 +18,11 @@ public class BatchResponse<T> {
         return new LiteralObjectStructure(fields);
     }
 
-    public final String next;
-    public final Integer totalCount;
-    public final List<T> data;
+    public final @NotNull String next;
+    public final int totalCount;
+    public final @NotNull List<T> data;
 
-    private BatchResponse(String next, Integer totalCount, List<T> data) {
+    private BatchResponse(@NotNull String next, int totalCount, @NotNull List<T> data) {
         this.next = next;
         this.totalCount = totalCount;
         this.data = data;

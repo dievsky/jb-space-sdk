@@ -20,7 +20,8 @@ class BatchApiRequest<T> implements ApiRequest<List<T>> {
 
   protected final ObjectApiRequest<BatchResponse<T>> request;
 
-  BatchApiRequest(SpaceService spaceService, String api, String method, Type elementType) {
+  BatchApiRequest(@NotNull SpaceService spaceService, @NotNull String api, @NotNull String method,
+                  @NotNull Type elementType) {
     Type batchType = TypeToken.getParameterized(BatchResponse.class, elementType).getType();
     request = new ObjectApiRequest<>(spaceService, api, method, batchType,
             BatchResponse.structure(DatatypeStructureDiscovery.structure(elementType)));
@@ -54,7 +55,7 @@ class BatchApiRequest<T> implements ApiRequest<List<T>> {
     return this;
   }
 
-  private List<T> doExecute() throws IOException, InterruptedException {
+  private @NotNull List<T> doExecute() throws IOException, InterruptedException {
     BatchResponse<T> batchResponse = request.execute();
     var res = new ArrayList<>(batchResponse.data);
     String next = "!" + batchResponse.next;
