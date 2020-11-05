@@ -53,11 +53,11 @@ import java.util.Map;
  */
 public class SpaceService {
 
-    private final String domain;
-    private final String serviceId;
-    private final String serviceSecret;
-    private final OAuthToken oauth;
-    private final HttpClient httpClient;
+    private final @NotNull String domain;
+    private final @NotNull String serviceId;
+    private final @NotNull String serviceSecret;
+    private final @NotNull OAuthToken oauth;
+    private final @NotNull HttpClient httpClient;
 
     private static final int SERVER_ERROR_RETRIES = 2;
     private static final Logger LOGGER = LoggerFactory.getLogger(SpaceService.class);
@@ -67,10 +67,11 @@ public class SpaceService {
      * @param serviceId The service ID.
      * @param serviceSecret The service secret.
      */
-    public SpaceService(String domain, String serviceId, String serviceSecret) {
+    public SpaceService(@NotNull String domain, @NotNull String serviceId, @NotNull String serviceSecret) {
         this.domain = domain;
         this.serviceId = serviceId;
         this.serviceSecret = serviceSecret;
+
         oauth = new OAuthToken();
         httpClient = HttpClient.newBuilder().build();
     }
@@ -83,35 +84,37 @@ public class SpaceService {
         return URI.create("https://" + domain + endpoint + SpaceQueryParameters.toQueryParameters(payload));
     }
 
+    /**
+     * Queries the given Space API endpoint using the specified method and payload, returns the response
+     * as raw JSON.
+     *
+     * Depending on the method, the payload will be converted to either the URL query parameters or to the request body.
+     *
+     * @param endpoint the API endpoint, e.g. "/api/http/absences".
+     * @param method the HTTP method, e.g. "GET".
+     * @param payload the query parameters.
+     * @return the response as raw JSON.
+     * @throws IOException if the HTTP request throws it.
+     * @throws InterruptedException if the HTTP request throws it.
+     */
     JsonElement rawJSONQuery(@NotNull String endpoint, @NotNull String method,
                              @NotNull Map<String, Object> payload) throws IOException, InterruptedException {
-        var res = HttpRequest.newBuilder().header("Accept", "application/json");
+        var builder = HttpRequest.newBuilder().header("Accept", "application/json");
         if ("GET".equals(method)) {
-            res.method("GET", HttpRequest.BodyPublishers.noBody())
-                    .uri(uri(endpoint,payload));
+            builder.method("GET", HttpRequest.BodyPublishers.noBody()).uri(uri(endpoint, payload));
         } else {
-            res.method(method, HttpRequest.BodyPublishers.ofString(SpaceQueryParameters.toPostBody(payload)))
+            builder.method(method, HttpRequest.BodyPublishers.ofString(SpaceQueryParameters.toPostBody(payload)))
                     .uri(uri(endpoint)).setHeader("Content-Type", "application/json");
         }
-        return rawJSONQuery(res, Authorization.BEARER);
+        return rawJSONQuery(builder, Authorization.BEARER);
     }
 
-    private JsonElement rawJSONQuery(HttpRequest.Builder builder,
-                                     Authorization authorization) throws IOException, InterruptedException {
-        HttpResponse<String> response = null;
-        switch (authorization) {
-            case BASIC:
-                builder.setHeader("Authorization",
-                        "Basic " + Base64.getEncoder().encodeToString((serviceId + ":" + serviceSecret)
-                                .getBytes(StandardCharsets.UTF_8)));
-                break;
-            case BEARER:
-                oauth.refreshIfNeeded();
-                builder.setHeader("Authorization", "Bearer " + oauth.token);
-                break;
-        }
+    private JsonElement rawJSONQuery(@NotNull HttpRequest.Builder builder,
+                                     @NotNull Authorization authorization) throws IOException, InterruptedException {
+        applyAuthorization(builder, authorization);
         final HttpRequest request = builder.build();
         long start = System.currentTimeMillis();
+        HttpResponse<String> response = null;
         for (int i = 0; i <= SERVER_ERROR_RETRIES; i++) {
             LOGGER.trace("Querying {}, attempt {}", request.uri(), i + 1);
             response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
@@ -131,11 +134,26 @@ public class SpaceService {
             return JsonParser.parseString(response.body());
         }
         LOGGER.error("Failed to query {} in {} ms", request.uri(), System.currentTimeMillis() - start);
-        throw new RuntimeException(String.valueOf(response));
+        throw new IOException("Failed to query " + request.uri() +", last response was " + response);
     }
 
     private enum Authorization {
         BASIC, BEARER
+    }
+
+    private void applyAuthorization(@NotNull HttpRequest.Builder builder, @NotNull Authorization authorization)
+            throws IOException, InterruptedException {
+        switch (authorization) {
+            case BASIC:
+                builder.setHeader("Authorization",
+                        "Basic " + Base64.getEncoder().encodeToString((serviceId + ":" + serviceSecret)
+                                .getBytes(StandardCharsets.UTF_8)));
+                break;
+            case BEARER:
+                oauth.refreshIfNeeded();
+                builder.setHeader("Authorization", "Bearer " + oauth.token);
+                break;
+        }
     }
 
     /**
@@ -186,8 +204,8 @@ public class SpaceService {
      * The request to get the member profiles.
      *
      * Accepts the following optional filtering parameters:
-     * "query", a string query, String.
-     * "reportPastMembers", whether to include the members who are no longer active, boolean.
+     * - "query", a string query, String.
+     * - "reportPastMembers", whether to include the members who are no longer active, boolean.
      *
      */
     @SuppressWarnings("unused")
@@ -230,7 +248,7 @@ public class SpaceService {
      * @param <T> The response type.
      */
     @SuppressWarnings("unused")
-    public <T> ApiRequest<T> get(String endpoint, Class<T> objectType) {
+    public <T> ApiRequest<T> getObject(String endpoint, Class<T> objectType) {
         return new ObjectApiRequest<>(this, endpoint, "GET", objectType,
                 DatatypeStructureDiscovery.structure(objectType));
     }
