@@ -14,7 +14,7 @@ public class TD_Location implements SpaceObject {
     this.parent = parent;
   }
 
-  public boolean belongsToLocation(@NotNull String locationId) {
-    return locationId.equals(id) || parent != null && parent.belongsToLocation(locationId);
+  public boolean isAncestorOrSelf(@NotNull String childLocationId) {
+    return childLocationId.equals(id) || parent != null && parent.isAncestorOrSelf(childLocationId);
   }
 }
