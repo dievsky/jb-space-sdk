@@ -1,5 +1,6 @@
 package org.jetbrains.space.sdk.datatype;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDate;
@@ -34,6 +35,11 @@ public class TD_MemberProfile implements SpaceObject {
             }
         }
         return null;
+    }
+
+    public @NotNull String getFormalOrLastFirstName() {
+        String formal = getFormalName();
+        return formal != null ? formal : name.lastThenFirst();
     }
 
     public @Nullable String getFormalName() {

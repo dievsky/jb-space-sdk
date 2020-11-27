@@ -1,5 +1,7 @@
 package org.jetbrains.space.sdk.datatype;
 
+import org.jetbrains.annotations.NotNull;
+
 public class TD_ProfileName implements SpaceObject {
 
     public final String firstName;
@@ -12,6 +14,14 @@ public class TD_ProfileName implements SpaceObject {
 
     @Override
     public String toString() {
+        return firstThenLast();
+    }
+
+    public @NotNull String firstThenLast() {
         return firstName + " " + lastName;
+    }
+
+    public @NotNull String lastThenFirst() {
+        return lastName + " " + firstName;
     }
 }
