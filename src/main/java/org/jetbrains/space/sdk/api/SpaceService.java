@@ -242,6 +242,10 @@ public class SpaceService {
         return getList("/api/http/hrm/business-entities/relations/" + memberId, BusinessEntityRelation.class);
     }
 
+    public @NotNull ApiRequest<TD_MemberProfile> getMemberProfileByEmail(@NotNull String email) {
+        return getObject("/api/http/team-directory/profiles/email:" + email, TD_MemberProfile.class);
+    }
+
     /**
      * The request to get an object from an arbitrary endpoint.
      *
