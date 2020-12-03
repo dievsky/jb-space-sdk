@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.DayOfWeek;
 import java.util.List;
+import java.util.Optional;
 
 public class WorkingDaysSpec implements SpaceObject {
 
@@ -15,8 +16,8 @@ public class WorkingDaysSpec implements SpaceObject {
         this.workingHours = workingHours;
     }
 
-    public @NotNull Workday find(@NotNull DayOfWeek dayOfWeek) {
-        return days.stream().filter(d -> d.weekday.equals(dayOfWeek.toString())).findFirst().orElseThrow();
+    public @NotNull Optional<Workday> find(@NotNull DayOfWeek dayOfWeek) {
+        return days.stream().filter(d -> d.weekday.equals(dayOfWeek.toString())).findFirst();
     }
 
     @Override
