@@ -111,31 +111,45 @@ public class SpaceService {
     }
 
     private @NotNull JsonElement rawJSONQuery(@NotNull HttpRequest.Builder builder,
-                                     @NotNull Authorization authorization) throws IOException, InterruptedException {
-        applyAuthorization(builder, authorization);
-        final HttpRequest request = builder.build();
+                                              @NotNull Authorization authorization) throws IOException, InterruptedException {
         long start = System.currentTimeMillis();
-        HttpResponse<String> response = null;
-        for (int i = 0; i <= SERVER_ERROR_RETRIES; i++) {
-            LOGGER.trace("Querying {}, attempt {}", request.uri(), i + 1);
-            response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        int attempt = 0;
+        while (true) {
+            attempt++;
+            applyAuthorization(builder, authorization);
+            HttpRequest request = builder.build();
+            LOGGER.trace("Querying {}, attempt {}", request.uri(), attempt);
+            HttpResponse<String> response;
+            try {
+                response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            } catch (IOException e) {
+                if (e.getMessage().contains("GOAWAY received") && waitAndRetry(attempt)) {
+                    LOGGER.debug("GOAWAY received for {}, recovering", request.uri());
+                    continue;
+                }
+                throw e;
+            }
             int statusCode = response.statusCode();
             if (statusCode != 200) {
-                if (statusCode >= 500 && statusCode < 600) {
-                    // server-side error, wait and retry
-                    Thread.sleep(200);
-                    LOGGER.trace("Response {}, retrying", statusCode);
+                if ((statusCode == 401 || statusCode >= 500 && statusCode < 600) && waitAndRetry(attempt)) {
                     continue;
                 } else {
                     LOGGER.trace("Response {}, giving up", statusCode);
-                    break;
-                }
+                    LOGGER.error("Failed to query {} in {} ms", request.uri(), System.currentTimeMillis() - start);
+                    throw new IOException("Failed to query " + request.uri() +", last response was " + response);
+               }
             }
             LOGGER.debug("Queried {} in {} ms", request.uri(), System.currentTimeMillis() - start);
             return JsonParser.parseString(response.body());
         }
-        LOGGER.error("Failed to query {} in {} ms", request.uri(), System.currentTimeMillis() - start);
-        throw new IOException("Failed to query " + request.uri() +", last response was " + response);
+    }
+
+    private boolean waitAndRetry(int attempt) throws InterruptedException, IOException {
+        if (attempt > SERVER_ERROR_RETRIES) return false;
+
+        Thread.sleep(200);
+        oauth.refresh();
+        return true;
     }
 
     private enum Authorization {
