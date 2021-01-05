@@ -39,9 +39,13 @@ class ObjectApiRequest<T> implements ApiRequest<T> {
   }
 
   @NotNull
-  ObjectApiRequest<T> doAddParameter(@NotNull String key, @NotNull Object value) {
+  protected ObjectApiRequest<T> doAddParameter(@NotNull String key, @NotNull Object value) {
     parameterMap.put(key, value);
     return this;
+  }
+
+  protected void doRemoveParameter(@NotNull String key) {
+    parameterMap.remove(key);
   }
 
   @Override

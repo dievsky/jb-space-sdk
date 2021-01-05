@@ -66,6 +66,7 @@ class BatchApiRequest<T> implements ApiRequest<List<T>> {
       batchResponse = request.execute();
       res.addAll(batchResponse.data);
     }
+    request.doRemoveParameter("$skip");
     return res;
   }
 
