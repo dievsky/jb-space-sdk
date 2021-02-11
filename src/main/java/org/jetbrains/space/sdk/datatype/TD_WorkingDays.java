@@ -12,7 +12,7 @@ public class TD_WorkingDays implements SpaceObject {
     public final @Nullable LocalDate dateEnd;
     public final WorkingDaysSpec workingDaysSpec;
 
-    private TD_WorkingDays(String id, @Nullable LocalDate dateStart, @Nullable LocalDate dateEnd, WorkingDaysSpec workingDaysSpec) {
+    public TD_WorkingDays(String id, @Nullable LocalDate dateStart, @Nullable LocalDate dateEnd, WorkingDaysSpec workingDaysSpec) {
         this.id = id;
         this.dateStart = dateStart;
         this.dateEnd = dateEnd;

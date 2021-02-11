@@ -6,7 +6,7 @@ public class WorkingDaysSpec implements SpaceObject {
 
     public final List<WorkingHours> workingHours;
 
-    private WorkingDaysSpec(List<WorkingHours> workingHours) {
+    public WorkingDaysSpec(List<WorkingHours> workingHours) {
         this.workingHours = workingHours;
     }
 

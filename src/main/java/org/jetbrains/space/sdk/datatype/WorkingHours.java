@@ -17,4 +17,9 @@ public class WorkingHours implements SpaceObject {
   public DayOfWeek getDayOfWeek() {
     return day == 0 ? DayOfWeek.SUNDAY : DayOfWeek.values()[day - 1];
   }
+
+  @Override
+  public String toString() {
+    return getDayOfWeek() + ":" + (checked ? interval.toString() : "-");
+  }
 }

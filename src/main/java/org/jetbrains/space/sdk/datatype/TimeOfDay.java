@@ -8,4 +8,9 @@ public class TimeOfDay {
     this.hours = hours;
     this.minutes = minutes;
   }
+
+  @Override
+  public String toString() {
+    return hours + ":" + minutes;
+  }
 }

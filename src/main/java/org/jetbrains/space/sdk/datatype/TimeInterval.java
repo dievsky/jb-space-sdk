@@ -8,4 +8,9 @@ public class TimeInterval {
     this.since = since;
     this.till = till;
   }
+
+  @Override
+  public String toString() {
+    return since + "-" + till;
+  }
 }
