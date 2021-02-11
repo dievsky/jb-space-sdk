@@ -5,7 +5,7 @@ public class AbsenceReasonRecord implements SpaceObject {
     public final String id;
     public final String name;
 
-    private AbsenceReasonRecord(String id, String name) {
+    public AbsenceReasonRecord(String id, String name) {
         this.id = id;
         this.name = name;
     }

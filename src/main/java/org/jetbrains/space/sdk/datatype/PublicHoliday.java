@@ -9,7 +9,7 @@ public class PublicHoliday implements SpaceObject {
     public final LocalDate date;
     public final boolean workingDay;
 
-    private PublicHoliday(String id, String name, LocalDate date, boolean workingDay) {
+    public PublicHoliday(String id, String name, LocalDate date, boolean workingDay) {
         this.id = id;
         this.name = name;
         this.date = date;

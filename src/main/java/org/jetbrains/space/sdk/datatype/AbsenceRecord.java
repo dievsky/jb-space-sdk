@@ -13,7 +13,7 @@ public class AbsenceRecord implements SpaceObject {
     public final TD_Location location;
     public final AbsenceReasonRecord reason;
 
-    private AbsenceRecord(String id, boolean archived, TD_MemberProfile member,
+    public AbsenceRecord(String id, boolean archived, TD_MemberProfile member,
                           String description, LocalDate since, LocalDate till,
                           TD_Location location, AbsenceReasonRecord reason) {
         this.id = id;
