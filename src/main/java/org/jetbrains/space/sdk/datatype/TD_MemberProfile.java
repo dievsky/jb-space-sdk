@@ -8,25 +8,32 @@ import java.util.List;
 import java.util.Map;
 
 public class TD_MemberProfile implements SpaceObject {
-
-    public final String id;
+    public final String id, username;
     public final TD_ProfileName name;
     public final TD_Location location;
-    public final LocalDate joined;
-    public final LocalDate left;
+    public final List<TD_MemberLocation> locations;
+    public final LocalDate joined, left;
+    public final String profilePicture, avatar, smallAvatar, about;
     public final List<TD_MemberProfile> managers;
+    public final List<TD_Membership> memberships;
     public final List<TD_ProfileEmail> emails;
     public final Map<String, CFValue> customFields;
 
-    public TD_MemberProfile(String id, TD_ProfileName name, TD_Location location, LocalDate joined, LocalDate left, List<TD_MemberProfile> managers, List<TD_ProfileEmail> emails, Map<String, CFValue> customFields) {
+    public TD_MemberProfile(String id, TD_ProfileName name) {
         this.id = id;
         this.name = name;
-        this.location = location;
-        this.joined = joined;
-        this.left = left;
-        this.managers = managers;
-        this.emails = emails;
-        this.customFields = customFields;
+
+        location = null;
+        locations = null;
+        joined = null;
+        left = null;
+        profilePicture = avatar = smallAvatar = null;
+        about = null;
+        managers = null;
+        emails = null;
+        customFields = null;
+        username = null;
+        memberships = null;
     }
 
     public @Nullable String getEmployeeNumber() {

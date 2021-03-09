@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDate;
 
-public class TD_WorkingDays implements SpaceObject {
+public class TD_WorkingDays implements SpaceObject, TimeRanged {
 
     public final String id;
     public final @Nullable LocalDate dateStart;
@@ -25,8 +25,14 @@ public class TD_WorkingDays implements SpaceObject {
         return !intervalAfterMe && !intervalBeforeMe;
     }
 
-    public boolean contains(@NotNull LocalDate date) {
-        return (dateEnd == null || !date.isAfter(dateEnd)) && (dateStart == null || !date.isBefore(dateStart));
+    @Override
+    public @Nullable LocalDate getStartDate() {
+        return dateStart;
+    }
+
+    @Override
+    public @Nullable LocalDate getEndDate() {
+        return dateEnd;
     }
 
     @Override
