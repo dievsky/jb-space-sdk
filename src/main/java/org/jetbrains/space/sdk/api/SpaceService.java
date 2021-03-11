@@ -141,7 +141,9 @@ public class SpaceService {
             } else if (statusCode == 401) {
                 // authorization invalid or expired, refresh token and retry
                 LOGGER.trace("Response {}, refreshing token", statusCode);
-                oauth.refresh();
+                if (authorization == Authorization.BEARER) {
+                    oauth.refresh();
+                }
             } else if (statusCode == 404) {
                 throw new ObjectNotFoundException();
             } else if (statusCode == 429 || statusCode >= 500 && statusCode < 600) {
