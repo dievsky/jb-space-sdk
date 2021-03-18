@@ -13,16 +13,16 @@ public interface ApiRequest<T> {
    * Add a query parameter to the request, for example "id=12345678".
    *
    * @param key   Query parameter key.
-   * @param value Query parameter value.
+   * @param value Query parameter value. Will be converted to String using JSON.
    * @return this request, following builder pattern.
    */
-  @NotNull ApiRequest<T> addParameter(@NotNull String key, @NotNull String value);
+  @NotNull ApiRequest<T> addParameter(@NotNull String key, @NotNull Object value);
 
   /**
    * Add a date-valued query parameter to the request, for example "since=2020-07-21".
    *
    * @param key   Query parameter key.
-   * @param value Query parameter value.
+   * @param value Query parameter value. Will be converted to String using ISO conversion.
    * @return this request, following builder pattern.
    */
   default @NotNull ApiRequest<T> addParameter(@NotNull String key, @NotNull LocalDate value) {

@@ -31,7 +31,7 @@ class ObjectApiRequest<T> implements ApiRequest<T> {
   }
 
   @Override
-  public @NotNull ApiRequest<T> addParameter(@NotNull String key, @NotNull String value) {
+  public @NotNull ApiRequest<T> addParameter(@NotNull String key, @NotNull Object value) {
     if (key.startsWith("$")) {
       throw new IllegalArgumentException("special parameter " + key + " can't be set directly");
     }

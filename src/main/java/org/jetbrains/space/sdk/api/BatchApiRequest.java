@@ -29,7 +29,7 @@ class BatchApiRequest<T> implements ApiRequest<List<T>> {
   }
 
   @Override
-  public @NotNull ApiRequest<List<T>> addParameter(@NotNull String key, @NotNull String value) {
+  public @NotNull ApiRequest<List<T>> addParameter(@NotNull String key, @NotNull Object value) {
     request.addParameter(key, value);
     return this;
   }
