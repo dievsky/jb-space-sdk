@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -275,6 +276,12 @@ public class SpaceService {
         return getObject("/api/http/team-directory/profiles/email:" + email, TD_MemberProfile.class);
     }
 
+    public <T> @NotNull ApiRequest<T> getObject(@NotNull String endpoint, @NotNull Class<T> objectType,
+                                                @NotNull String method) {
+        return new ObjectApiRequest<>(this, endpoint, method, objectType,
+                DatatypeStructureDiscovery.structure(objectType));
+    }
+
     /**
      * The request to get an object from an arbitrary endpoint.
      *
@@ -282,10 +289,8 @@ public class SpaceService {
      * @param objectType The expected response type, e.g. `TD_MemberProfile.class`.
      * @param <T> The response type.
      */
-    @SuppressWarnings("unused")
     public <T> @NotNull ApiRequest<T> getObject(@NotNull String endpoint, @NotNull Class<T> objectType) {
-        return new ObjectApiRequest<>(this, endpoint, "GET", objectType,
-                DatatypeStructureDiscovery.structure(objectType));
+        return getObject(endpoint, objectType, "GET");
     }
 
     /**
@@ -310,6 +315,18 @@ public class SpaceService {
      */
     public <T> @NotNull ApiRequest<List<T>> getBatch(@NotNull String endpoint, @NotNull Class<T> elementType) {
         return new BatchApiRequest<>(this, endpoint, "GET", elementType);
+    }
+
+    @SuppressWarnings("unused")
+    public ApiRequest<ChannelItemRecord> sendTextMessage(@NotNull String memberId, @NotNull String messageText) {
+        var recipient = new HashMap<String, String>();
+        recipient.put("className", "MessageRecipient.Member");
+        recipient.put("member", "id:" + memberId);
+        var content = new HashMap<String, String>();
+        content.put("className", "ChatMessage.Text");
+        content.put("text", messageText);
+        return getObject("/api/http/chats/messages/send-message", ChannelItemRecord.class, "POST")
+                .addParameter("recipient", recipient).addParameter("content", content);
     }
 
     private class OAuthToken {
