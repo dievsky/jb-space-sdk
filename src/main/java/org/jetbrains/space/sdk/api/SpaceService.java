@@ -276,6 +276,11 @@ public class SpaceService {
         return getObject("/api/http/team-directory/profiles/email:" + email, TD_MemberProfile.class);
     }
 
+    public @NotNull ApiRequest<AvailableVacationDays> getMemberAvailableVacationDays(@NotNull String memberId) {
+        return getObject("/api/http/hrm/vacations/member-available-vacation-days",
+                AvailableVacationDays.class).addParameter("member", "id:" + memberId);
+    }
+
     public <T> @NotNull ApiRequest<T> getObject(@NotNull String endpoint, @NotNull Class<T> objectType,
                                                 @NotNull String method) {
         return new ObjectApiRequest<>(this, endpoint, method, objectType,
