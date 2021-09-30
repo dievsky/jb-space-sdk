@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public class CFValue implements SpaceObject {
 
@@ -35,14 +36,19 @@ public class CFValue implements SpaceObject {
 
   /**
    * Try to cast this CFValue object to a more specific type based on the className field.
+   *
    * @return a CFValue of a more specific type, or this.
    */
   public @NotNull CFValue cast() {
     if ("StringCFValue".equals(className)) {
       return new StringCFValue((String) value);
-    } else {
-      return this;
     }
+
+    if ("EnumCFValue".equals(className)) {
+      return new EnumCFValue((Map<String, String>) value);
+    }
+
+    return this;
   }
 
   public static @NotNull TypeAdapterFactory ADAPTER_FACTORY = new TypeAdapterFactory() {
