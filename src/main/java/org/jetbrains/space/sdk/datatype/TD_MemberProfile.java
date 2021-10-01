@@ -77,9 +77,9 @@ public class TD_MemberProfile implements SpaceObject {
 
     public @Nullable String getGender() {
         if (customFields != null) {
-            final CFValue wearSizeField = customFields.get("Gender");
-            if (wearSizeField instanceof EnumCFValue) {
-                return ((EnumCFValue) wearSizeField).getValue();
+            final CFValue genderField = customFields.get("Gender");
+            if (genderField instanceof EnumCFValue) {
+                return ((EnumCFValue) genderField).getValue();
             }
         }
         return null;
