@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +13,8 @@ public class TD_MemberProfile implements SpaceObject {
     public final TD_ProfileName name;
     public final TD_Location location;
     public final List<TD_MemberLocation> locations;
-    public final LocalDate joined, left;
+    public final LocalDate joined;
+    public final LocalDateTime leftAt;
     public final LocalDate birthday;
     public final String gender;
     public final String profilePicture, avatar, smallAvatar, about;
@@ -28,7 +30,7 @@ public class TD_MemberProfile implements SpaceObject {
         location = null;
         locations = null;
         joined = null;
-        left = null;
+        leftAt = null;
         profilePicture = avatar = smallAvatar = null;
         about = null;
         managers = null;
@@ -38,6 +40,10 @@ public class TD_MemberProfile implements SpaceObject {
         memberships = null;
         birthday = null;
         gender = null;
+    }
+
+    public @Nullable LocalDate dateLeft() {
+        return leftAt == null ? null : leftAt.toLocalDate();
     }
 
     public @Nullable String getEmployeeNumber() {

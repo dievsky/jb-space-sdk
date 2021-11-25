@@ -372,23 +372,43 @@ public class SpaceService {
             if (in.peek().equals(JsonToken.STRING)) {
                 return LocalDate.parse(in.nextString(), DateTimeFormatter.ISO_DATE);
             }
-            in.beginObject();
-            LocalDate res = null;
-            while (!in.peek().equals(JsonToken.END_OBJECT)) {
-                String name = in.nextName();
-                if (name.equals("iso")) {
-                    res = LocalDate.parse(in.nextString(), DateTimeFormatter.ISO_DATE);
-                } else {
-                    in.skipValue();
-                }
-            }
-            in.endObject();
-            return res;
+            String iso = readIsoField(in);
+            return iso == null ? null : LocalDate.parse(iso, DateTimeFormatter.ISO_DATE);
         }
     };
 
+    private static final TypeAdapter<LocalDateTime> LOCAL_DATE_TIME_TYPE_ADAPTER = new TypeAdapter<>() {
+        @Override
+        public void write(@NotNull JsonWriter out, @NotNull LocalDateTime value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public @Nullable LocalDateTime read(@NotNull JsonReader in) throws IOException {
+            String iso = readIsoField(in);
+            return iso == null ? null : LocalDateTime.parse(iso, DateTimeFormatter.ISO_DATE_TIME);
+        }
+    };
+
+    @Nullable
+    private static String readIsoField(@NotNull JsonReader in) throws IOException {
+        in.beginObject();
+        String res = null;
+        while (!in.peek().equals(JsonToken.END_OBJECT)) {
+            String name = in.nextName();
+            if (name.equals("iso")) {
+                res = in.nextString();
+            } else {
+                in.skipValue();
+            }
+        }
+        in.endObject();
+        return res;
+    }
+
     static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(LocalDate.class, LOCAL_DATE_TYPE_ADAPTER.nullSafe())
+            .registerTypeAdapter(LocalDateTime.class, LOCAL_DATE_TIME_TYPE_ADAPTER.nullSafe())
             .registerTypeAdapterFactory(CFValue.ADAPTER_FACTORY)
             .create();
 
