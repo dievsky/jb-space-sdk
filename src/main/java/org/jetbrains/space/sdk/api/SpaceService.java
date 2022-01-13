@@ -236,13 +236,25 @@ public class SpaceService {
      * The request to get the member profiles.
      *
      * Accepts the following optional filtering parameters:
-     * - "query", a string query, String.
-     * - "reportPastMembers", whether to include the members who are no longer active, boolean.
+     * <ul>
+     * <li>"query", a string query, String.</li>
+     * <li>"reportPastMembers", whether to include the members who are no longer active, boolean.</li>
+     * </ul>
      *
      */
     @SuppressWarnings("unused")
     public @NotNull ApiRequest<List<TD_MemberProfile>> getProfiles() {
         return getBatch("/api/http/team-directory/profiles", TD_MemberProfile.class);
+    }
+
+    /**
+     * The request to get a member profile by ID.
+     *
+     * @param id the profile ID.
+     */
+    @SuppressWarnings("unused")
+    public @NotNull ApiRequest<TD_MemberProfile> getProfile(@NotNull String id) {
+        return getObject("/api/http/team-directory/profiles/id:" + id, TD_MemberProfile.class);
     }
 
     public @NotNull ApiRequest<List<TD_MemberLocation>> getMemberLocations() {
