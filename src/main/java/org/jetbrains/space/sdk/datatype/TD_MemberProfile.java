@@ -22,6 +22,7 @@ public class TD_MemberProfile implements SpaceObject {
     public final List<TD_Membership> memberships;
     public final List<TD_ProfileEmail> emails;
     public final Map<String, CFValue> customFields;
+    public final boolean notAMember;
 
     public TD_MemberProfile(String id, TD_ProfileName name) {
         this.id = id;
@@ -40,6 +41,11 @@ public class TD_MemberProfile implements SpaceObject {
         memberships = null;
         birthday = null;
         gender = null;
+        notAMember = false;
+    }
+
+    public @Nullable TD_MemberLocation findLocationForDate(LocalDate date) {
+      return locations == null ? null : locations.stream().filter(l -> l.containsDate(date)).findFirst().orElse(null);
     }
 
     public @Nullable LocalDate dateLeft() {
