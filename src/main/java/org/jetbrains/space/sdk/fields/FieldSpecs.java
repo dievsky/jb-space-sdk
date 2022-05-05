@@ -88,7 +88,7 @@ public class FieldSpecs {
 
     private void addField(boolean recursive, @NotNull String fieldName, @NotNull String... fieldNames) {
         if (!structure.hasField(fieldName, fieldNames)) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(fieldNames.length > 0 ? fieldNames[fieldNames.length - 1] : fieldName);
         }
         FieldSpec fieldSpec;
         if (specs.containsKey(fieldName)) {
