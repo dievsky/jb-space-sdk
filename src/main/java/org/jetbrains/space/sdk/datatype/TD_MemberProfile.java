@@ -23,6 +23,7 @@ public class TD_MemberProfile implements SpaceObject {
     public final List<TD_ProfileEmail> emails;
     public final Map<String, CFValue> customFields;
     public final boolean notAMember;
+    public final String externalId;
 
     public TD_MemberProfile(String id, TD_ProfileName name) {
         this.id = id;
@@ -42,6 +43,7 @@ public class TD_MemberProfile implements SpaceObject {
         birthday = null;
         gender = null;
         notAMember = false;
+        externalId = null;
     }
 
     public @Nullable TD_MemberLocation findLocationForDate(LocalDate date) {
