@@ -101,6 +101,8 @@ public class TD_MemberProfile implements SpaceObject {
   }
 
   public @Nullable String getCurrentLocation() {
+    if (locations == null) return null;
+
     return locations.stream()
       .filter(loc -> loc.till == null)
       .map(loc ->
