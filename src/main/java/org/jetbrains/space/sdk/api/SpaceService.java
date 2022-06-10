@@ -418,7 +418,7 @@ public class SpaceService {
         return res;
     }
 
-    static final Gson GSON = new GsonBuilder()
+    public static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(LocalDate.class, LOCAL_DATE_TYPE_ADAPTER.nullSafe())
             .registerTypeAdapter(LocalDateTime.class, LOCAL_DATE_TIME_TYPE_ADAPTER.nullSafe())
             .registerTypeAdapterFactory(CFValue.ADAPTER_FACTORY)
