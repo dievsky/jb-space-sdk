@@ -72,6 +72,25 @@ public class TD_MemberProfile implements SpaceObject {
 
   public @Nullable String getFormalName() {
     if (customFields != null) {
+      // get the "new" formal name
+      final CFValue formalFirstName = customFields.get("First Name (Formal)");
+      final CFValue formalLastName = customFields.get("Last Name (Formal)");
+      if (formalFirstName != null || formalLastName != null) {
+        StringBuilder builder = new StringBuilder();
+        if (formalLastName != null) {
+          builder.append(((StringCFValue) formalLastName).getValue());
+        } else {
+          builder.append(name.lastName);
+        }
+        builder.append(" ");
+        if (formalFirstName != null) {
+          builder.append(((StringCFValue) formalFirstName).getValue());
+        } else {
+          builder.append(name.firstName);
+        }
+        return builder.toString();
+      }
+      // get the "old" formal name
       final CFValue formalNameField = customFields.get("Formal name");
       if (formalNameField instanceof StringCFValue) {
         return ((StringCFValue) formalNameField).getValue();
