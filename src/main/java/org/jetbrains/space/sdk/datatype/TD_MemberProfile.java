@@ -77,13 +77,13 @@ public class TD_MemberProfile implements SpaceObject {
       final CFValue formalLastName = customFields.get("Last Name (Formal)");
       if (formalFirstName != null || formalLastName != null) {
         StringBuilder builder = new StringBuilder();
-        if (formalLastName != null) {
+        if (formalLastName != null && ((StringCFValue) formalLastName).getValue() != null) {
           builder.append(((StringCFValue) formalLastName).getValue());
         } else {
           builder.append(name.lastName);
         }
         builder.append(" ");
-        if (formalFirstName != null) {
+        if (formalFirstName != null && ((StringCFValue) formalFirstName).getValue() != null) {
           builder.append(((StringCFValue) formalFirstName).getValue());
         } else {
           builder.append(name.firstName);
