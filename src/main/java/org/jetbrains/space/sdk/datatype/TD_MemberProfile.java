@@ -77,13 +77,15 @@ public class TD_MemberProfile implements SpaceObject {
       final CFValue formalLastName = customFields.get("Last Name (Formal)");
       if (formalFirstName != null || formalLastName != null) {
         StringBuilder builder = new StringBuilder();
-        if (formalLastName != null && ((StringCFValue) formalLastName).getValue() != null) {
+        if (formalLastName != null && ((StringCFValue) formalLastName).getValue() != null && !((StringCFValue) formalLastName).getValue()
+          .isBlank()) {
           builder.append(((StringCFValue) formalLastName).getValue());
         } else {
           builder.append(name.lastName);
         }
         builder.append(" ");
-        if (formalFirstName != null && ((StringCFValue) formalFirstName).getValue() != null) {
+        if (formalFirstName != null && ((StringCFValue) formalFirstName).getValue() != null && !((StringCFValue) formalFirstName).getValue()
+          .isBlank()) {
           builder.append(((StringCFValue) formalFirstName).getValue());
         } else {
           builder.append(name.firstName);
@@ -93,7 +95,8 @@ public class TD_MemberProfile implements SpaceObject {
       // get the "old" formal name
       final CFValue formalNameField = customFields.get("Formal name");
       if (formalNameField instanceof StringCFValue) {
-        return ((StringCFValue) formalNameField).getValue();
+        var formalName = ((StringCFValue) formalNameField).getValue();
+        if (formalName != null && !formalName.isBlank()) return formalName;
       }
     }
     return null;
